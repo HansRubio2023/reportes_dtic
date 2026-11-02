@@ -59,6 +59,8 @@ function campo_correo(string $nombre, string $valor = '', bool $requerido = true
 // Cabecera y menú de la página.
 function render_header(string $titulo, ?array $u = null): void
 {
+    // Solo las pantallas con sesión iniciada llevan el aviso de cierre por inactividad.
+    $GLOBALS['sesion_aviso'] = $u !== null;
     ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -103,6 +105,13 @@ function render_header(string $titulo, ?array $u = null): void
                     </div>
                 </details>
             <?php endif; ?>
+            <details class="nav-desplegable">
+                <summary>Ayuda</summary>
+                <div class="nav-desplegable-menu">
+                    <a href="manual.php" target="_blank" rel="noopener">Ver manual de usuario</a>
+                    <a href="manual.php?descargar=1">Descargar manual (PDF)</a>
+                </div>
+            </details>
             <details class="nav-desplegable nav-desplegable-usuario">
                 <summary><?= h($u['nombre']) ?></summary>
                 <div class="nav-desplegable-menu">
@@ -128,6 +137,10 @@ function render_footer(): void
 <script src="assets/contador.js?v=<?= (int) @filemtime(__DIR__ . '/../assets/contador.js') ?>"></script>
 <script src="assets/correo.js?v=<?= (int) @filemtime(__DIR__ . '/../assets/correo.js') ?>"></script>
 <script src="assets/escaner_firma.js?v=<?= (int) @filemtime(__DIR__ . '/../assets/escaner_firma.js') ?>"></script>
+<?php if (!empty($GLOBALS['sesion_aviso'])): ?>
+<script>window.DTIC_SESION = { minutos: <?= (int) SESION_MINUTOS ?>, aviso: 2 };</script>
+<script src="assets/sesion.js?v=<?= (int) @filemtime(__DIR__ . '/../assets/sesion.js') ?>"></script>
+<?php endif; ?>
 </body>
 </html>
     <?php
