@@ -17,6 +17,8 @@ session_set_cookie_params([
 ]);
 // Inicia la sesión del usuario.
 session_start();
+// Minutos sin actividad después de los cuales se cierra la sesión.
+define('SESION_MINUTOS', 30);
 
 // Indica si todavía no hay ningún usuario registrado.
 function sin_usuarios(mysqli $conn): bool
@@ -28,6 +30,16 @@ function sin_usuarios(mysqli $conn): bool
 function usuario_actual(): ?array
 {
     return $_SESSION['usuario'] ?? null;
+}
+
+// Indica si la sesión lleva más de SESION_MINUTOS sin actividad.
+function sesion_expirada(): bool
+{
+    if (!usuario_actual()) {
+        return false;
+    }
+    $ultima = $_SESSION['ultima_actividad'] ?? time();
+    return time() - $ultima > SESION_MINUTOS * 60;
 }
 
 // Exige sesión iniciada y que la cuenta siga activa.
@@ -44,6 +56,23 @@ function require_login(): array
         header('Location: login.php');
         exit;
     }
+    if (sesion_expirada()) {
+        // Se recuerda la página que se estaba abriendo para volver a ella después del login.
+        $volver = null;
+        if (($_SERVER['REQUEST_METHOD'] ?? '') === 'GET') {
+            $pagina = basename(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '');
+            $query  = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_QUERY);
+            $volver = $pagina . ($query ? '?' . $query : '');
+        }
+        $_SESSION = [];
+        session_regenerate_id(true);
+        if ($volver) {
+            $_SESSION['volver_a'] = $volver;
+        }
+        header('Location: login.php?expirada=1');
+        exit;
+    }
+    $_SESSION['ultima_actividad'] = time();
 
     global $conn;
     $stmt = $conn->prepare('SELECT activo FROM usuarios WHERE id = ?');
@@ -97,6 +126,7 @@ function intentar_login(mysqli $conn, string $correo, string $clave): bool
         unset($u['password_hash'], $u['activo']);
         session_regenerate_id(true);
         $_SESSION['usuario'] = $u;
+        $_SESSION['ultima_actividad'] = time();
         return true;
     }
     return false;

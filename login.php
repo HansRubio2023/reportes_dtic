@@ -9,6 +9,11 @@ if (sin_usuarios($conn)) {
     exit;
 }
 
+// Si la sesión venció por inactividad, se limpia antes de mostrar el login.
+if (sesion_expirada()) {
+    $_SESSION = [];
+}
+
 if (usuario_actual()) {
     // Redirige a otra página.
     header('Location: index.php');
@@ -16,6 +21,7 @@ if (usuario_actual()) {
 }
 
 $error = '';
+$aviso = ($_GET['expirada'] ?? '')=== '1' ? 'Tu sesión ha expirado. Inicia sesión nuevamente.' : '';
 
 // Se ejecuta cuando se envía el formulario.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -55,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="post" class="form-login">
             <h1>Iniciar sesión</h1>
             <?php if ($error): ?><p class="error"><?= h($error) ?></p><?php endif; ?>
+            <?php if ($aviso && !$error): ?><p class="aviso"><?= h($aviso) ?></p><?php endif; ?>
             <?= csrf_field() ?>
             <label>Correo
                 <input type="email" name="correo" required autofocus>

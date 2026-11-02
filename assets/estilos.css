@@ -809,3 +809,11 @@ input[readonly],
 @media (max-width: 640px) {
     .tabla { display: block; overflow-x: auto; }
 }
+
+.sesion-aviso { position: fixed; inset: 0; background: rgba(17, 24, 39, 0.55); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 16px; }
+.sesion-aviso-caja { background: #fff; border-radius: 10px; padding: 22px 24px; max-width: 420px; width: 100%; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); }
+.sesion-aviso-caja h2 { margin: 0 0 8px; font-size: 18px; }
+.sesion-aviso-caja p { margin: 0 0 16px; }
+.sesion-aviso-tiempo { font-size: 20px; font-variant-numeric: tabular-nums; }
+.sesion-aviso-botones { display: flex; gap: 10px; flex-wrap: wrap; }
+.sesion-cerrar { display: inline-block; padding: 9px 18px; border-radius: 6px; border: 1px solid #b7c3cd; color: #1f2937; text-decoration: none; font-weight: 600; font-size: 14px; }
